@@ -1,7 +1,16 @@
 import { notFound, parseBucketPath } from "@/utils/bucket";
+import {browser_auth} from "@/utils/auth";
 
 export async function onRequestGet(context) {
   try {
+    if(!browser_auth(context)){
+      var header = new Headers()
+      header.set("WWW-Authenticate",'Basic realm="需要登录"')
+      return new Response("没有操作权限", {
+          status: 401,
+          headers: header,
+      });
+    }
     const [bucket, path] = parseBucketPath(context);
     const prefix = path && `${path}/`;
     if (!bucket || prefix.startsWith("_$flaredrive$/")) return notFound();
